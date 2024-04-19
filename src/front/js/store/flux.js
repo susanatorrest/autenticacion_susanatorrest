@@ -12,13 +12,73 @@ const getState = ({ getStore, getActions, setStore }) => {
 					title: "SECOND",
 					background: "white",
 					initial: "white"
-				}
-			]
+				}, 
+
+			],
+
+			userAccess : false
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
 			exampleFunction: () => {
 				getActions().changeColor(0, "green");
+			},
+
+			createNewUser: async (newUser) => {
+				try{
+					const response = await fetch(process.env.BACKEND_URL + "/api/signup",{
+						method: "POST",
+						body: JSON.stringify(newUser),
+						headers: {
+							'Content-Type': 'application/json'
+						}
+					});
+					if(!response.ok){
+						throw new Error("There was a problem request")
+					}
+						const data = await response.json()
+						console.log('User created sccessfully', data)
+						const actions = getActions();
+
+				}
+
+				catch(error){
+					console.error("Cannot create the new user", error)
+				}
+			},
+
+			tokenConfirmation: async (user) => {
+				try{
+					const response = await fetch(process.env.BACKEND_URL + "/api/login",{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify(user)
+					});
+					
+					if(!response.ok){
+						throw new Error("There was a problem request")
+					}
+					const data = await response.json();
+					console.log("data:", data)
+					if(response.ok){
+						setStore({
+							userAccess: true
+						})
+						return data;
+					}
+
+					// if(data.access === true){ 
+					// console.log("Llamada de set store")
+					// setStore({userAcces : true});}
+					// console.log("Token validado exitosamente", data);
+					
+				}
+
+				catch(error){
+					console.error("There was an error trying to take the confirmation", error)
+				}
 			},
 
 			getMessage: async () => {
